@@ -271,7 +271,7 @@ function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i
 function initPeer(){
   if(peer&&!peer.destroyed)return;
   setSt('cn','VERBINDE…');setPst('Verbinde…');
-  peer=new Peer('ADK-'+genCode(),{host:'0.peerjs.com',port:443,path:'/',secure:true,debug:0});
+  peer=new Peer('ADK-'+genCode(),{host:'0.peerjs.com',port:443,path:'/',secure:true,debug:0,serialization:'json'});
   peer.on('open',id=>{pid=id;setSt('on','BEREIT');setPst('Bereit ✓');});
   peer.on('error',e=>{setSt('off','FEHLER');setPst('Fehler: '+e.type);toast('Fehler: '+e.type);});
   peer.on('disconnected',()=>peer.reconnect());
@@ -301,13 +301,16 @@ function handleMsg(d,from){
     case 'join':
       if(!isHost)return;
       if(rp.length>=6){from.send({t:'err',m:'Raum voll!'});return;}
-      // Color fixed by slot — no conflicts possible
-      rp.push({pid:d.pid||from.peer,name:d.name,color:COLORS[rp.length],ctrlIdx:d.ci,isMe:false});
+      // Use pid from message (reliable), fallback to conn.peer
+      const guestPid = d.pid || from.peer;
+      // Avoid duplicate joins
+      if(rp.find(p=>p.pid===guestPid))return;
+      rp.push({pid:guestPid,name:d.name,color:COLORS[rp.length],ctrlIdx:d.ci,isMe:false});
       bcastRoom();renderW();
       break;
     case 'room':
       // Authoritative room state from host
-      rp=d.players.map(p=>({...p,isMe:p.pid===pid}));
+      rp=d.players.map(p=>({...p,isMe:p.pid===peer.id}));
       maxR=d.maxR;
       document.querySelectorAll('.rb').forEach(b=>b.classList.toggle('on',+b.textContent===maxR));
       renderW();
@@ -317,7 +320,7 @@ function handleMsg(d,from){
       document.querySelectorAll('.rb').forEach(b=>b.classList.toggle('on',+b.textContent===maxR));
       break;
     case 'start':
-      rp=d.players.map(p=>({...p,isMe:p.pid===pid}));
+      rp=d.players.map(p=>({...p,isMe:p.pid===peer.id}));
       maxR=d.maxR;sc={};rp.forEach(p=>sc[p.name]=0);rnd=1;
       guestStart();
       break;
@@ -389,7 +392,7 @@ function oCreate(){
   if(!peer||peer.destroyed){toast('Noch nicht verbunden…');return;}
   const name=$('oname').value.trim()||'Spieler 1';
   isHost=true;mode='host';conns=[];
-  pid=peer.id;
+  pid=peer.id||peer._id;
   rp=[{pid,name,color:COLORS[0],ctrlIdx:myCtrl,isMe:true}];
   openW(true);
 }
@@ -400,15 +403,29 @@ function oJoin(){
   const name=$('oname').value.trim()||'Spieler';
   isHost=false;mode='guest';conns=[];
   setSt('cn','VERBINDE…');
-  const conn=peer.connect('ADK-'+raw,{reliable:true});
-  conns=[conn];
-  conn.on('open',()=>{
-    conn.send({t:'join',name,ci:myCtrl,pid:peer.id});
-    conn.on('data',d=>handleMsg(d,conn));
-    conn.on('close',()=>{toast('Verbindung getrennt!');leave();});
-    openW(false);setSt('on','GAST · '+raw);toast('Verbunden ✓');
-  });
-  conn.on('error',e=>toast('Fehler: '+e));
+
+  // Make sure we have our own peer ID before connecting
+  const doConnect = () => {
+    const myId = peer.id;
+    const conn=peer.connect('ADK-'+raw,{reliable:true,serialization:'json'});
+    conns=[conn];
+    conn.on('open',()=>{
+      // Send join with our verified peer ID
+      conn.send({t:'join',name,ci:myCtrl,pid:myId});
+      conn.on('data',d=>handleMsg(d,conn));
+      conn.on('close',()=>{toast('Verbindung getrennt!');leave();});
+      openW(false);setSt('on','GAST · '+raw);toast('Verbunden ✓');
+    });
+    conn.on('error',e=>toast('Verbindungsfehler: '+e));
+  };
+
+  if(peer.id){
+    doConnect();
+  } else {
+    // Wait for peer to fully open first
+    peer.once('open', doConnect);
+    toast('Verbinde mit Server…');
+  }
 }
 function openW(host){
   const code=peer.id.replace('ADK-','');
