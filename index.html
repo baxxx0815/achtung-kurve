@@ -538,6 +538,20 @@ function handleMsg(data, fromConn){
       }
       break;
 
+    case 'state': // host → guests: full game state every frame
+      if(gameMode==='guest'&&gameState){
+        const cv=document.getElementById('cv');
+        const ctx=cv.getContext('2d');
+        renderGuestState(ctx,data,gameState.players,cv.width,cv.height);
+      }
+      break;
+
+    case 'round-end': // host → guests: round ended
+      if(gameMode==='guest'){
+        if(gameState) endRound(gameState.players, gameState.players.filter(p=>p.alive));
+      }
+      break;
+
     case 'rejected':
       toast('Beitreten abgelehnt: '+data.reason);
       break;
@@ -763,23 +777,51 @@ function startOnlineRound(seed){
 }
 
 // ═══════════════════════════════════════════════════════════
-//  GAME LOOP
+//  GAME LOOP — Authoritative Host Model
+//  Host: runs all physics, broadcasts state every frame
+//  Guest: sends keys to host, receives + renders state
 // ═══════════════════════════════════════════════════════════
 function runLoop(ctx,players,W,H){
-  // Online guests: send input every frame
-  let inputTick=0;
-
   function tick(){
     tickCount++;
-    inputTick++;
 
-    // Online guest: broadcast own key state to host
-    if(gameMode==='guest' && inputTick%2===0){
+    if(gameMode==='guest'){
+      // GUEST: just send keys, rendering handled by incoming state
       const me=players.find(p=>p.isMe);
-      if(me) sendToHost({type:'input', peerId:myPeerId, left:isDown(me.lk), right:isDown(me.rk), tick:tickCount});
+      if(me) sendToHost({
+        type:'input',
+        peerId:myPeerId,
+        left:isDown(me.lk),
+        right:isDown(me.rk)
+      });
+      rafId=requestAnimationFrame(tick);
+      return;
     }
 
+    // HOST (or local): run full physics
     doTick(ctx,players,W,H);
+
+    // HOST online: broadcast full state to all guests every frame
+    if(gameMode==='host'){
+      broadcast({
+        type:'state',
+        tick: tickCount,
+        players: players.map(p=>({
+          name:  p.name,
+          x:     p.x,
+          y:     p.y,
+          angle: p.angle,
+          alive: p.alive,
+          gap:   p.gap,
+          // send last trail segment for guests to draw
+          trailX: p.alive&&!p.gap ? p.x : null,
+          trailY: p.alive&&!p.gap ? p.y : null,
+          trailPX: p.alive&&!p.gap ? p._prevX : null,
+          trailPY: p.alive&&!p.gap ? p._prevY : null,
+          color: p.color,
+        }))
+      });
+    }
 
     const alive=players.filter(p=>p.alive);
     if(alive.length<=1){endRound(players,alive);return;}
@@ -789,16 +831,11 @@ function runLoop(ctx,players,W,H){
 }
 
 function doTick(ctx,players,W,H){
-  // 1. Steer
+  // 1. Steer — host uses local keys for own player, remote keys for guests
   players.forEach(p=>{
     if(!p.alive)return;
-    let left,right;
-    if(p.isLocal){
-      left=isDown(p.lk); right=isDown(p.rk);
-    } else {
-      // Online: use last received input from that guest
-      left=p.remoteLeft; right=p.remoteRight;
-    }
+    const left  = p.isLocal ? isDown(p.lk) : p.remoteLeft;
+    const right = p.isLocal ? isDown(p.rk) : p.remoteRight;
     if(left)  p.angle-=TURN;
     if(right) p.angle+=TURN;
   });
@@ -807,19 +844,24 @@ function doTick(ctx,players,W,H){
   players.forEach(p=>{
     if(!p.alive)return;
     if(p.gap){if(--p.gapT<=0)p.gap=false;}
-    else if(Math.random()<GAP_P){p.gap=true;p.gapT=GAP_MIN+Math.floor(Math.random()*(GAP_MAX-GAP_MIN));}
+    else if(Math.random()<GAP_P){
+      p.gap=true;
+      p.gapT=GAP_MIN+Math.floor(Math.random()*(GAP_MAX-GAP_MIN));
+    }
   });
 
   // 3. Move + collide + paint
   players.forEach(p=>{
     if(!p.alive)return;
+    p._prevX=p.x; p._prevY=p.y;
     const nx=p.x+Math.cos(p.angle)*SPEED;
     const ny=p.y+Math.sin(p.angle)*SPEED;
 
+    // Wall
     if(nx<=WALL||nx>=W-WALL||ny<=WALL||ny>=H-WALL){kill(ctx,p);return;}
 
+    // Trail collision (swept)
     if(!p.gap){
-      // Swept collision: check distance from movement segment to each trail segment
       const hitSq=HIT_DIST*HIT_DIST;
       outer: for(let pi=0;pi<players.length;pi++){
         const other=players[pi];
@@ -827,13 +869,11 @@ function doTick(ctx,players,W,H){
         for(let ti=0;ti<other.trail.length;ti++){
           const dot=other.trail[ti];
           if(isSelf&&(tickCount-dot.tick)<SELF_GRACE)continue;
-          // Fast bounding box reject
           const minX=Math.min(dot.px,dot.x)-HIT_DIST;
           const maxX=Math.max(dot.px,dot.x)+HIT_DIST;
           const minY=Math.min(dot.py,dot.y)-HIT_DIST;
           const maxY=Math.max(dot.py,dot.y)+HIT_DIST;
-          if(nx<minX||nx>maxX||ny<minY||ny>maxY) continue;
-          // Exact: point nx,ny vs trail segment dot.px,dot.py -> dot.x,dot.y
+          if(nx<minX||nx>maxX||ny<minY||ny>maxY)continue;
           if(distSqPointSeg(nx,ny,dot.px,dot.py,dot.x,dot.y)<hitSq){
             kill(ctx,p);break outer;
           }
@@ -844,12 +884,11 @@ function doTick(ctx,players,W,H){
     if(!p.alive)return;
 
     if(!p.gap){
-      // Store segment: from previous position to new position
-      p.trail.push({x:nx,y:ny, px:p.x,py:p.y, tick:tickCount});
+      p.trail.push({x:nx,y:ny,px:p.x,py:p.y,tick:tickCount});
       ctx.beginPath();ctx.arc(nx,ny,LINE_R,0,Math.PI*2);
       ctx.fillStyle=p.color;ctx.fill();
     }
-    p.x=nx;p.y=ny;
+    p.x=nx; p.y=ny;
   });
 
   // 4. Heads
@@ -860,8 +899,54 @@ function doTick(ctx,players,W,H){
     ctx.beginPath();ctx.arc(p.x,p.y,LINE_R,0,Math.PI*2);ctx.fillStyle=p.color;ctx.fill();
   });
 
-  // 5. Border on top
+  // 5. Border
   drawBorder(ctx,W,H);
+}
+
+// Guest renders state received from host
+function renderGuestState(ctx,data,players,W,H){
+  data.players.forEach(pd=>{
+    const p=players.find(p=>p.name===pd.name);
+    if(!p)return;
+
+    // Sync position + alive from host
+    const wasAlive=p.alive;
+    p.alive=pd.alive;
+    p.x=pd.x; p.y=pd.y; p.angle=pd.angle; p.gap=pd.gap;
+
+    // Draw trail segment sent by host
+    if(pd.trailX!==null&&pd.trailPX!==null){
+      ctx.beginPath();ctx.arc(pd.trailX,pd.trailY,LINE_R,0,Math.PI*2);
+      ctx.fillStyle=pd.color;ctx.fill();
+    }
+
+    // Death explosion
+    if(wasAlive&&!pd.alive){
+      ctx.save();
+      for(let i=0;i<12;i++){
+        const a=(i/12)*Math.PI*2,r=5+Math.random()*9;
+        ctx.beginPath();ctx.moveTo(p.x,p.y);
+        ctx.lineTo(p.x+Math.cos(a)*r,p.y+Math.sin(a)*r);
+        ctx.strokeStyle=p.color;ctx.lineWidth=1.5;ctx.globalAlpha=.75;ctx.stroke();
+      }
+      ctx.beginPath();ctx.arc(p.x,p.y,3.5,0,Math.PI*2);
+      ctx.fillStyle='#fff';ctx.globalAlpha=1;ctx.fill();
+      ctx.restore();
+      updateScores();
+    }
+
+    // Draw head
+    if(p.alive){
+      ctx.beginPath();ctx.arc(p.x,p.y,LINE_R+3,0,Math.PI*2);ctx.fillStyle=p.color+'30';ctx.fill();
+      ctx.beginPath();ctx.arc(p.x,p.y,LINE_R+1.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+      ctx.beginPath();ctx.arc(p.x,p.y,LINE_R,0,Math.PI*2);ctx.fillStyle=p.color;ctx.fill();
+    }
+  });
+  drawBorder(ctx,W,H);
+
+  // Check if round over
+  const alive=players.filter(p=>p.alive);
+  if(alive.length<=1) endRound(players,alive);
 }
 
 function kill(ctx,p){
@@ -890,6 +975,8 @@ function endRound(players,alive){
     toast('Alle tot — keine Punkte!');
   }
   updateScores();
+
+  if(gameMode==='host') broadcast({type:'round-end'});
 
   if(roundNum>=maxRounds){
     const winner=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0];
