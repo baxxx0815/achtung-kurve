@@ -179,25 +179,26 @@ const dn=k=>DW.has(k)||DW.has(k.toUpperCase())||DW.has(k.toLowerCase());
 // ═══════════════════════════════════════════════════════
 //  MATH
 // ═══════════════════════════════════════════════════════
-// Pixel-perfect collision via offscreen canvas
-function collCheck(x,y){
-  if(!collCtx)return false;
-  const px=Math.round(x), py=Math.round(y);
-  // Sample a 3x3 area around head
-  const d=collCtx.getImageData(Math.max(0,px-1),Math.max(0,py-1),3,3).data;
-  for(let i=3;i<d.length;i+=4) if(d[i]>128) return true;
+// Trail stored as flat array of circles: [x, y, x, y, ...]
+// Each player has p.trail = [{x,y,born}] — born = tc when painted
+// Collision = distance check against all trail circles except own recent ones
+const TRAIL_R = LR + 0.5; // effective collision radius
+
+function trailHit(nx, ny, players, self, selfGrace) {
+  const r2 = TRAIL_R * TRAIL_R;
+  for (let pi = 0; pi < players.length; pi++) {
+    const o = players[pi];
+    const isSelf = (o === self);
+    const t = o.trail;
+    for (let ti = 0; ti < t.length; ti++) {
+      const dot = t[ti];
+      // Skip own dots that are too fresh
+      if (isSelf && dot.born > selfGrace) continue;
+      const dx = nx - dot.x, dy = ny - dot.y;
+      if (dx * dx + dy * dy < r2) return true;
+    }
+  }
   return false;
-}
-function collPaint(x,y,px,py,color,isGap){
-  if(!collCtx||isGap)return;
-  // Draw thick line segment on collision canvas
-  collCtx.strokeStyle=color;
-  collCtx.lineWidth=LR*2+1;
-  collCtx.lineCap='round';
-  collCtx.beginPath();
-  collCtx.moveTo(px,py);
-  collCtx.lineTo(x,y);
-  collCtx.stroke();
 }
 function mkRng(seed){
   let s=seed>>>0;
@@ -617,25 +618,32 @@ function initRound(){
   const ctx=setupCanvas();
   drawField(ctx);
 
-  // Offscreen collision canvas (same size, black bg = free, colored = wall)
-  const collCanvas=document.createElement('canvas');
-  collCanvas.width=GS; collCanvas.height=GS;
-  collCtx=collCanvas.getContext('2d');
-  collCtx.fillStyle='#000';
-  collCtx.fillRect(0,0,GS,GS);
-  // Paint wall into collision canvas
-  collCtx.fillStyle='#fff';
-  collCtx.fillRect(0,0,GS,WL); collCtx.fillRect(0,GS-WL,GS,WL);
-  collCtx.fillRect(0,0,WL,GS); collCtx.fillRect(GS-WL,0,WL,GS);
+  // Trail-based collision — no offscreen canvas needed
 
   const rng=mkRng(rnd*9999+42);
   const margin=WL+60;
   const src=rp;
 
+  // Generate spawn positions with minimum distance between players
+  const MIN_SPAWN_DIST = 80;
+  const spawnPositions = [];
+  src.forEach(() => {
+    let sx, sy, attempts = 0;
+    do {
+      sx = margin + rng() * (GS - 2 * margin);
+      sy = margin + rng() * (GS - 2 * margin);
+      attempts++;
+    } while (attempts < 50 && spawnPositions.some(sp => {
+      const dx = sx - sp.x, dy = sy - sp.y;
+      return Math.sqrt(dx*dx + dy*dy) < MIN_SPAWN_DIST;
+    }));
+    spawnPositions.push({x: sx, y: sy});
+  });
+
   const players=src.map((p,i)=>{
     const ctrl=CTRL[p.ctrlIdx!=null?p.ctrlIdx:i]||CTRL[0];
-    const _sx=margin+rng()*(GS-2*margin);
-    const _sy=margin+rng()*(GS-2*margin);
+    const _sx = spawnPositions[i].x;
+    const _sy = spawnPositions[i].y;
     return {
       name:p.name,color:p.color,
       lk:ctrl.l,rk:ctrl.r,
@@ -644,13 +652,13 @@ function initRound(){
       x:_sx,
       y:_sy,
       angle:(()=>{
-        // Point toward center ±50°
+        // Point toward center ±45°
         const dx=GS/2-_sx, dy=GS/2-_sy;
         const base=Math.atan2(dy,dx);
-        return base+(rng()-0.5)*(Math.PI*5/9);
+        return base+(rng()-0.5)*(Math.PI/2);
       })(),
       alive:true,gap:false,gapT:0,
-      px:0,py:0, // previous position for collision painting
+      trail:[], // [{x,y,born}] — circle list for collision
       rL:false,rR:false, // remote keys
       _px:0,_py:0,
     };
@@ -705,39 +713,47 @@ function runLoop(ctx,players){
 
     // ── MOVE + COLLIDE + PAINT ──
     players.forEach(p=>{
-      if(!p.alive)return;
-      const nx=p.x+Math.cos(p.angle)*SPD;
-      const ny=p.y+Math.sin(p.angle)*SPD;
+      if(!p.alive) return;
 
-      // Wall collision (bounds check)
-      if(nx<=WL||nx>=GS-WL||ny<=WL||ny>=GS-WL){doKill(ctx,p);return;}
+      const nx = p.x + Math.cos(p.angle) * SPD;
+      const ny = p.y + Math.sin(p.angle) * SPD;
 
-      // Pixel-perfect trail collision — check BEFORE painting
-      // Grace: skip collision check for first 80 ticks (own fresh trail)
-      if(!p.gap&&tc>80){
-        if(collCheck(nx,ny)){doKill(ctx,p);return;}
-      } else if(!p.gap&&tc>0){
-        // During grace: still check against OTHER players' trails
-        // Temporarily hide own color, check, restore
-        // Simpler: check pixel — own trail not yet painted for first 80tc anyway
-        if(collCheck(nx,ny)){doKill(ctx,p);return;}
+      // ── Wall collision ──
+      if (nx < WL + TRAIL_R || nx > GS - WL - TRAIL_R ||
+          ny < WL + TRAIL_R || ny > GS - WL - TRAIL_R) {
+        doKill(ctx, p); return;
       }
-      if(!p.alive)return;
 
-      // Paint trail on both visible canvas and collision canvas
-      if(!p.gap){
-        // Visible canvas — smooth line
-        ctx.strokeStyle=p.color;
-        ctx.lineWidth=LR*2;
-        ctx.lineCap='round';
+      // ── Trail collision ──
+      // Own trail: only lethal after GRACE_TICKS ticks
+      // Others' trails: lethal immediately (but only after they have painted any dots)
+      const GRACE_TICKS = 90; // ~1.5s — enough to clear own spawn area
+      // selfGrace = the tc value below which own dots are safe
+      const selfGrace = tc - GRACE_TICKS;
+
+      if (!p.gap && trailHit(nx, ny, players, p, selfGrace)) {
+        doKill(ctx, p); return;
+      }
+      if (!p.alive) return;
+
+      // ── Paint ──
+      if (!p.gap) {
+        // Add to collision trail (every frame)
+        p.trail.push({x: nx, y: ny, born: tc});
+
+        // Draw on visible canvas
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = LR * 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
         ctx.beginPath();
-        ctx.moveTo(p.x,p.y);
-        ctx.lineTo(nx,ny);
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(nx, ny);
         ctx.stroke();
-        // Collision canvas — paint after moving to avoid self-collision on fresh spawn
-        if(tc>60) collPaint(nx,ny,p.x,p.y,p.color,false);
       }
-      p.x=nx;p.y=ny;
+
+      p.x = nx;
+      p.y = ny;
     });
 
     // ── DRAW HEADS ──
