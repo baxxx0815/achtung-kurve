@@ -29,9 +29,6 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 input{width:100%;background:rgba(0,255,231,.04);border:1px solid rgba(0,255,231,.18);color:#e0f0ff;font-family:'Share Tech Mono',monospace;font-size:14px;padding:8px 10px;outline:none;border-radius:2px;transition:border-color .2s;}
 input:focus{border-color:var(--a);}
 input::placeholder{color:rgba(255,255,255,.15);}
-.tabs{display:flex;border:1px solid rgba(0,255,231,.18);border-radius:2px;overflow:hidden;margin-bottom:16px;}
-.tab{flex:1;padding:9px;background:transparent;border:none;color:rgba(0,255,231,.42);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:.13em;cursor:pointer;transition:all .15s;text-transform:uppercase;}
-.tab.on{background:rgba(0,255,231,.12);color:var(--a);}
 .tc{display:none;}.tc.on{display:block;}
 .prow{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:2px;margin-bottom:5px;}
 .prow.me{border-color:rgba(0,255,231,.22);background:rgba(0,255,231,.035);}
@@ -55,7 +52,8 @@ hr.d{border:none;border-top:1px solid rgba(255,255,255,.07);margin:10px 0;}
 #rn{font-size:18px;font-weight:900;color:rgba(255,255,255,.35);display:block;text-align:center;}
 #gm{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#020608;}
 #cv{display:block;image-rendering:pixelated;}
-#gi{display:none;image-rendering:pixelated;max-width:100%;max-height:100%;object-fit:contain;}
+#gi{display:none;image-rendering:pixelated;width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;z-index:1;}
+#ov{z-index:10;}
 #ov{position:absolute;inset:0;background:rgba(5,10,16,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;backdrop-filter:blur(4px);z-index:10;}
 #ov.h{display:none;}
 #ot{font-family:'Orbitron',sans-serif;font-size:clamp(18px,4vw,36px);font-weight:900;text-align:center;color:var(--a);}
@@ -80,24 +78,7 @@ hr.d{border:none;border-top:1px solid rgba(255,255,255,.07);margin:10px 0;}
 <div class="screen on" id="home-screen">
   <div><div class="TT">ACHTUNG<br>DIE KURVE</div><div style="font-size:11px;color:rgba(0,255,231,.38);letter-spacing:.3em;text-transform:uppercase;text-align:center;margin-top:4px">Online Multiplayer · 2–6 Spieler</div></div>
   <div class="panel" style="width:min(500px,96vw)">
-    <div class="tabs">
-      <button class="tab on" onclick="stab('local')">⌨ Lokal</button>
-      <button class="tab" onclick="stab('online')">🌐 Online</button>
-    </div>
-    <div class="tc on" id="tc-local">
-      <div style="font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:.24em;color:var(--a);margin-bottom:12px;text-align:center">SPIELER</div>
-      <div id="ll"></div>
-      <div style="display:flex;gap:6px;margin-bottom:11px">
-        <button class="btn" id="btnadd" onclick="addP()" style="flex:1">+ SPIELER</button>
-        <button class="btn bad" onclick="remP()" style="flex:1">− SPIELER</button>
-      </div>
-      <div style="margin-bottom:11px"><label class="lbl">RUNDEN</label><div style="display:flex;gap:5px" id="rb-l"></div></div>
-      <button class="btn ok" style="width:100%;padding:12px;font-size:12px" onclick="startLocal()">▶ STARTEN</button>
-      <hr class="d" style="margin:11px 0 8px">
-      <div class="hint">P1:← →&nbsp;&nbsp;P2:A D&nbsp;&nbsp;P3:Q W&nbsp;&nbsp;P4:H J&nbsp;&nbsp;P5:K L&nbsp;&nbsp;P6:N M</div>
-    </div>
-    <div class="tc" id="tc-online">
-      <div style="font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:.24em;color:var(--a);margin-bottom:12px;text-align:center">ONLINE</div>
+    <div style="font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:.24em;color:var(--a);margin-bottom:12px;text-align:center">ONLINE MULTIPLAYER</div>
       <div style="margin-bottom:10px"><label class="lbl">Dein Name</label><input id="oname" placeholder="Name..." maxlength="14"></div>
       <div style="margin-bottom:11px"><label class="lbl">Steuerung (auf deiner Tastatur)</label><div id="ctrlsel" style="display:flex;gap:5px;flex-wrap:wrap"></div></div>
       <div style="display:flex;gap:6px;margin-bottom:9px">
@@ -112,7 +93,6 @@ hr.d{border:none;border-top:1px solid rgba(255,255,255,.07);margin:10px 0;}
         </div>
       </div>
       <div id="pst" style="font-size:9px;color:rgba(0,255,231,.36);letter-spacing:.09em;text-align:center;margin-top:4px">Verbinde…</div>
-    </div>
   </div>
 </div>
 
@@ -129,6 +109,7 @@ hr.d{border:none;border-top:1px solid rgba(255,255,255,.07);margin:10px 0;}
     <div style="font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:.22em;color:var(--a);margin-bottom:11px;text-align:center">SPIELER (<span id="pcnt">0</span>/6)</div>
     <div id="wlist" style="margin-bottom:12px;min-height:38px"></div>
     <div id="rndwrap" style="margin-bottom:12px"><label class="lbl">RUNDEN</label><div style="display:flex;gap:5px" id="rb-w"></div></div>
+    <div id="spdwrap" style="margin-bottom:12px"><label class="lbl">GESCHWINDIGKEIT</label><div style="display:flex;gap:5px" id="spd-w"></div></div>
     <div id="hctrl"><button class="btn ok" style="width:100%;padding:11px" onclick="hStart()">▶ SPIEL STARTEN</button></div>
     <div id="gwait" style="display:none;text-align:center;font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.14em;padding:9px">Warte auf Host…</div>
   </div>
@@ -173,7 +154,8 @@ const CTRL=[
 const PN=['Spieler 1','Spieler 2','Spieler 3','Spieler 4','Spieler 5','Spieler 6'];
 
 // Physics — fixed 600×600 logical canvas ALWAYS
-const GS=600, SPD=2.8, TRN=0.040, LR=3, WL=10;
+const GS=600, TRN=0.040, LR=3, WL=10;
+let SPD=2.0; // adjustable speed
 const GP=0.008, GMN=14, GMX=34, GRC=120, HD=LR+1.0;
 
 // ═══════════════════════════════════════════════════════
@@ -215,14 +197,21 @@ let _t=null;
 function toast(m,ms=2800){const el=$('toast');el.textContent=m;el.classList.add('show');clearTimeout(_t);_t=setTimeout(()=>el.classList.remove('show'),ms);}
 const fk=k=>({ArrowLeft:'←',ArrowRight:'→',ArrowUp:'↑',ArrowDown:'↓'}[k])||k.toUpperCase();
 
-function stab(t){
-  ['local','online'].forEach(n=>$('tc-'+n).classList.toggle('on',n===t));
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',i===(t==='local'?0:1)));
-  if(t==='online'&&(!peer||peer.destroyed))initPeer();
-}
+
 function setSt(s,l){$('st').className='st '+(s==='on'?'':s==='cn'?'cn':'off');$('stxt').textContent=l||s;}
 function setPst(m){$('pst').textContent=m;}
 function togJoin(){const e=$('jw');e.style.display=e.style.display==='none'?'block':'none';if(e.style.display==='block')$('jcode').focus();}
+
+function mkSpdBtns(cid){
+  const opts=[{v:1.2,l:'Sehr Langsam'},{v:1.7,l:'Langsam'},{v:2.2,l:'Mittel'},{v:2.8,l:'Schnell'},{v:3.5,l:'Sehr Schnell'}];
+  $(cid).innerHTML=opts.map(o=>
+    `<button class="btn rb${o.v===SPD?' on':''}" data-spd="${o.v}" onclick="setSPD(${o.v})" style="font-size:9px;padding:6px 3px;flex:1">${o.l}</button>`).join('');
+}
+function setSPD(v){
+  SPD=v;
+  document.querySelectorAll('#spd-w button').forEach(b=>b.classList.toggle('on',parseFloat(b.dataset.spd)===v));
+  if(isHost)bcast({t:'cfg',maxR,SPD});
+}
 
 function mkRbs(cid){
   $(cid).innerHTML=[3,5,7,10,15].map(n=>
@@ -231,33 +220,16 @@ function mkRbs(cid){
 function setR(n){
   maxR=n;
   document.querySelectorAll('.rb').forEach(b=>b.classList.toggle('on',+b.textContent===n));
-  if(isHost)bcast({t:'cfg',maxR});
+  if(isHost)bcast({t:'cfg',maxR,SPD});
 }
 
 // ═══════════════════════════════════════════════════════
 //  LOCAL PLAYERS
 // ═══════════════════════════════════════════════════════
-function initLP(){
-  lp=[{name:PN[0],color:COLORS[0],ctrl:CTRL[0]},{name:PN[1],color:COLORS[1],ctrl:CTRL[1]}];
-  renderLP();
-}
-function renderLP(){
-  const el=$('ll');el.innerHTML='';
-  lp.forEach((p,i)=>{
-    const r=document.createElement('div');r.className='prow';
-    r.innerHTML=`<div class="dot" style="background:${p.color};box-shadow:0 0 5px ${p.color}80"></div>
-      <input value="${p.name}" maxlength="12" style="flex:1;background:transparent;border:none;color:#e0f0ff;font-family:'Share Tech Mono',monospace;font-size:13px;outline:none" oninput="lp[${i}].name=this.value">
-      <div style="display:flex;gap:3px"><span class="kp">${fk(p.ctrl.l)}</span><span class="kp">${fk(p.ctrl.r)}</span></div>`;
-    el.appendChild(r);
-  });
-  $('btnadd').disabled=lp.length>=6;
-}
-function addP(){if(lp.length>=6)return;const i=lp.length;lp.push({name:PN[i],color:COLORS[i],ctrl:CTRL[i]});renderLP();}
-function remP(){if(lp.length<=2){toast('Min. 2 Spieler!');return;}lp.pop();renderLP();}
 
-// ═══════════════════════════════════════════════════════
-//  CTRL PICKER (online)
-// ═══════════════════════════════════════════════════════
+
+
+
 function renderCtrl(){
   $('ctrlsel').innerHTML=CTRL.map((c,i)=>
     `<button class="btn rb${i===myCtrl?' on':''}" onclick="pickCtrl(${i})" style="font-size:10px;padding:5px 7px">${c.lb}</button>`).join('');
@@ -271,7 +243,7 @@ function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i
 function initPeer(){
   if(peer&&!peer.destroyed)return;
   setSt('cn','VERBINDE…');setPst('Verbinde…');
-  peer=new Peer('ADK-'+genCode(),{host:'0.peerjs.com',port:443,path:'/',secure:true,debug:0,serialization:'json'});
+  peer=new Peer('ADK-'+genCode(),{host:'0.peerjs.com',port:443,path:'/',secure:true,debug:0});
   peer.on('open',id=>{pid=id;setSt('on','BEREIT');setPst('Bereit ✓');});
   peer.on('error',e=>{setSt('off','FEHLER');setPst('Fehler: '+e.type);toast('Fehler: '+e.type);});
   peer.on('disconnected',()=>peer.reconnect());
@@ -317,6 +289,7 @@ function handleMsg(d,from){
       break;
     case 'cfg':
       maxR=d.maxR;
+      if(d.SPD)SPD=d.SPD;
       document.querySelectorAll('.rb').forEach(b=>b.classList.toggle('on',+b.textContent===maxR));
       break;
     case 'start':
@@ -331,10 +304,39 @@ function handleMsg(d,from){
         if(p){p.rL=d.l;p.rR=d.r;}
       }
       break;
+    case 'chunk':
+      // Reassemble chunked frame
+      if(mode==='guest'){
+        if(!window._chunks)window._chunks={};
+        const key=d.fid;
+        if(!window._chunks[key])window._chunks[key]=[];
+        window._chunks[key][d.i]=d.data;
+        if(d.i===d.total-1){
+          // Last chunk — reassemble
+          const img=window._chunks[key].join('');
+          delete window._chunks[key];
+          // Clean up old incomplete frames
+          const keys=Object.keys(window._chunks);
+          if(keys.length>3)keys.slice(0,-3).forEach(k=>delete window._chunks[k]);
+          // Process as frame
+          const meta=d.meta||{};
+          meta.img=img;
+          handleMsg({...meta},from);
+        }
+      }
+      break;
     case 'frame':
       // *** THE CORE: host sends canvas as JPEG, guest just shows it ***
       if(mode==='guest'){
-        $('gi').src=d.img;
+        if(d.img){
+          const gi=$('gi');
+          gi.src=d.img;
+          // Make sure img is visible
+          if(gi.style.display==='none'){
+            gi.style.cssText='display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;position:absolute;top:0;left:0;z-index:1;';
+            $('cv').style.display='none';
+          }
+        }
         if(d.sc){Object.assign(sc,d.sc);updSc();}
         if(d.rnd!==undefined){$('rn').textContent=d.rnd;$('rtot').textContent=d.maxR;}
         if(d.ov==='hide')hideOv();
@@ -361,9 +363,7 @@ function bcastRoom(){bcast({t:'room',players:rp,maxR});}
 //  WAITING ROOM
 // ═══════════════════════════════════════════════════════
 function renderW(){
-  const src=mode==='local'
-    ?lp.map((p,i)=>({...p,pid:'L'+i,isMe:true,ctrlIdx:i}))
-    :rp;
+  const src=rp;
   $('pcnt').textContent=src.length;
   const el=$('wlist');el.innerHTML='';
   src.forEach((p,i)=>{
@@ -407,7 +407,7 @@ function oJoin(){
   // Make sure we have our own peer ID before connecting
   const doConnect = () => {
     const myId = peer.id;
-    const conn=peer.connect('ADK-'+raw,{reliable:true,serialization:'json'});
+    const conn=peer.connect('ADK-'+raw,{reliable:true});
     conns=[conn];
     conn.on('open',()=>{
       // Send join with our verified peer ID
@@ -432,9 +432,10 @@ function openW(host){
   $('codebox').textContent=code;
   $('codewrap').style.display='block';
   $('rndwrap').style.display=host?'block':'none';
+  $('spdwrap').style.display=host?'block':'none';
   $('hctrl').style.display=host?'block':'none';
   $('gwait').style.display=host?'none':'block';
-  mkRbs('rb-w');renderW();ss('wait-screen');
+  mkRbs('rb-w');mkSpdBtns('spd-w');renderW();ss('wait-screen');
   if(host){setSt('on','HOST · '+code);toast('Raum erstellt: '+code);}
 }
 function leave(){
@@ -450,27 +451,11 @@ function leave(){
 // ═══════════════════════════════════════════════════════
 //  LOCAL START
 // ═══════════════════════════════════════════════════════
-function startLocal(){
-  if(lp.length<2){toast('Min. 2 Spieler!');return;}
-  mode='local';sc={};lp.forEach(p=>sc[p.name]=0);rnd=1;
-  $('codewrap').style.display='none';
-  $('rndwrap').style.display='block';
-  $('hctrl').style.display='block';
-  $('gwait').style.display='none';
-  mkRbs('rb-w');renderW();ss('wait-screen');
-}
 
-// ═══════════════════════════════════════════════════════
-//  HOST START
-// ═══════════════════════════════════════════════════════
 function hStart(){
-  if(mode==='local'){
-    sc={};lp.forEach(p=>sc[p.name]=0);rnd=1;
-    goGame();return;
-  }
   if(rp.length<2){toast('Min. 2 Spieler!');return;}
   sc={};rp.forEach(p=>sc[p.name]=0);rnd=1;
-  bcast({t:'start',players:rp,maxR});
+  bcast({t:'start',players:rp,maxR,SPD});
   goGame();
 }
 function goGame(){
@@ -485,8 +470,8 @@ function goGame(){
 function guestStart(){
   ss('game-screen');
   $('cv').style.display='none';
-  const gi=$('gi');gi.style.display='block';
-  gi.style.cssText='display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;';
+  const gi=$('gi');
+  gi.style.cssText='display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;position:absolute;top:0;left:0;';
   sc={};rp.forEach(p=>sc[p.name]=0);
   updSc();$('rn').textContent=rnd;$('rtot').textContent=maxR;
   showOv('WARTE…','Host startet');
@@ -557,15 +542,15 @@ function initRound(){
 
   const rng=mkRng(rnd*9999+42);
   const margin=WL+60;
-  const src=mode==='local'?lp:rp;
+  const src=rp;
 
   const players=src.map((p,i)=>{
-    const ctrl=mode==='local'?p.ctrl:CTRL[p.ctrlIdx!=null?p.ctrlIdx:i]||CTRL[0];
+    const ctrl=CTRL[p.ctrlIdx!=null?p.ctrlIdx:i]||CTRL[0];
     return {
       name:p.name,color:p.color,
       lk:ctrl.l,rk:ctrl.r,
       pid:p.pid||('L'+i),
-      isLocal:mode==='local'||!!p.isMe,
+      isLocal:!!p.isMe,
       x:margin+rng()*(GS-2*margin),
       y:margin+rng()*(GS-2*margin),
       angle:rng()*Math.PI*2,
@@ -684,17 +669,28 @@ function runLoop(ctx,players){
   raf=requestAnimationFrame(tick);
 }
 
-// Stream canvas as JPEG to all guests
+// Stream canvas as JPEG to all guests — with chunking for large frames
+const CHUNK=15000; // 15KB chunks to stay under DataChannel limits
 function bcastFrame(ctx,showOv,ovTitle,ovSub){
-  if(mode==='host'&&conns.length>0){
-    const cv=$('cv');
-    bcast({
-      t:'frame',
-      img:cv.toDataURL('image/jpeg',0.55),
-      sc:{...sc},rnd,maxR,
-      ov:showOv?'show':'hide',
-      ot:ovTitle||'',os:ovSub||'',
-    });
+  if(mode!=='host'||conns.length===0)return;
+  const cv=$('cv');
+  const imgData=cv.toDataURL('image/jpeg',0.3);
+  const meta={t:'frame',sc:{...sc},rnd,maxR,
+    ov:showOv?'show':'hide',ot:ovTitle||'',os:ovSub||''};
+
+  if(imgData.length<=CHUNK){
+    // Small enough — send in one packet
+    meta.img=imgData;
+    bcast(meta);
+  } else {
+    // Split into chunks
+    const total=Math.ceil(imgData.length/CHUNK);
+    const fid=tc; // frame id
+    for(let i=0;i<total;i++){
+      const chunk={t:'chunk',fid,i,total,data:imgData.slice(i*CHUNK,(i+1)*CHUNK)};
+      if(i===total-1) chunk.meta=meta; // send metadata with last chunk
+      bcast(chunk);
+    }
   }
 }
 
@@ -756,7 +752,7 @@ function endRound(players,alive,ctx){
 // ═══════════════════════════════════════════════════════
 function showWinner(name,scores){
   if(scores)Object.assign(sc,scores);
-  const src=mode==='local'?lp:rp;
+  const src=rp;
   const p=src.find(p=>p.name===name);
   const c=p?p.color:'var(--a)';
   updSc();
@@ -795,7 +791,7 @@ function showOv(t,s){$('ov').classList.remove('h');$('ot').textContent=t;$('ot')
 function hideOv(){$('ov').classList.add('h');}
 
 function updSc(){
-  const src=mode==='local'?lp:rp;
+  const src=rp;
   const sorted=[...src].sort((a,b)=>(sc[b.name]||0)-(sc[a.name]||0));
   const el=$('sclist');el.innerHTML='';
   sorted.forEach(p=>{
@@ -810,7 +806,7 @@ function updSc(){
 // ═══════════════════════════════════════════════════════
 //  BOOT
 // ═══════════════════════════════════════════════════════
-initLP();mkRbs('rb-l');mkRbs('rb-w');renderCtrl();
+mkRbs('rb-w');mkSpdBtns('spd-w');renderCtrl();initPeer();
 setTimeout(()=>{try{initPeer();}catch(e){}},400);
 </script>
 </body>
