@@ -179,21 +179,19 @@ const dn=k=>DW.has(k)||DW.has(k.toUpperCase())||DW.has(k.toLowerCase());
 // ═══════════════════════════════════════════════════════
 //  MATH
 // ═══════════════════════════════════════════════════════
-// Trail stored as flat array of circles: [x, y, x, y, ...]
-// Each player has p.trail = [{x,y,born}] — born = tc when painted
-// Collision = distance check against all trail circles except own recent ones
-const TRAIL_R = LR + 0.5; // effective collision radius
+const TRAIL_R = LR + 0.5;
+const GRACE = 100; // own trail safe for this many ticks
 
-function trailHit(nx, ny, players, self, selfGrace) {
+function trailHit(nx, ny, players, self) {
   const r2 = TRAIL_R * TRAIL_R;
   for (let pi = 0; pi < players.length; pi++) {
     const o = players[pi];
     const isSelf = (o === self);
     const t = o.trail;
-    for (let ti = 0; ti < t.length; ti++) {
+    // Check from oldest dots — skip own recent ones
+    const skipAfter = isSelf ? Math.max(0, t.length - GRACE) : t.length;
+    for (let ti = 0; ti < skipAfter; ti++) {
       const dot = t[ti];
-      // Skip own dots that are too fresh
-      if (isSelf && dot.born > selfGrace) continue;
       const dx = nx - dot.x, dy = ny - dot.y;
       if (dx * dx + dy * dy < r2) return true;
     }
@@ -624,26 +622,10 @@ function initRound(){
   const margin=WL+60;
   const src=rp;
 
-  // Generate spawn positions with minimum distance between players
-  const MIN_SPAWN_DIST = 80;
-  const spawnPositions = [];
-  src.forEach(() => {
-    let sx, sy, attempts = 0;
-    do {
-      sx = margin + rng() * (GS - 2 * margin);
-      sy = margin + rng() * (GS - 2 * margin);
-      attempts++;
-    } while (attempts < 50 && spawnPositions.some(sp => {
-      const dx = sx - sp.x, dy = sy - sp.y;
-      return Math.sqrt(dx*dx + dy*dy) < MIN_SPAWN_DIST;
-    }));
-    spawnPositions.push({x: sx, y: sy});
-  });
-
   const players=src.map((p,i)=>{
     const ctrl=CTRL[p.ctrlIdx!=null?p.ctrlIdx:i]||CTRL[0];
-    const _sx = spawnPositions[i].x;
-    const _sy = spawnPositions[i].y;
+    const _sx = margin + rng() * (GS - 2*margin);
+    const _sy = margin + rng() * (GS - 2*margin);
     return {
       name:p.name,color:p.color,
       lk:ctrl.l,rk:ctrl.r,
@@ -718,30 +700,21 @@ function runLoop(ctx,players){
       const nx = p.x + Math.cos(p.angle) * SPD;
       const ny = p.y + Math.sin(p.angle) * SPD;
 
-      // ── Wall collision ──
-      if (nx < WL + TRAIL_R || nx > GS - WL - TRAIL_R ||
-          ny < WL + TRAIL_R || ny > GS - WL - TRAIL_R) {
+      // ── Wall collision (simple bounds) ──
+      if (nx <= WL || nx >= GS-WL || ny <= WL || ny >= GS-WL) {
         doKill(ctx, p); return;
       }
 
       // ── Trail collision ──
-      // Own trail: only lethal after GRACE_TICKS ticks
-      // Others' trails: lethal immediately (but only after they have painted any dots)
-      const GRACE_TICKS = 90; // ~1.5s — enough to clear own spawn area
-      // selfGrace = the tc value below which own dots are safe
-      const selfGrace = tc - GRACE_TICKS;
-
-      if (!p.gap && trailHit(nx, ny, players, p, selfGrace)) {
+      if (!p.gap && trailHit(nx, ny, players, p)) {
         doKill(ctx, p); return;
       }
       if (!p.alive) return;
 
       // ── Paint ──
       if (!p.gap) {
-        // Add to collision trail (every frame)
-        p.trail.push({x: nx, y: ny, born: tc});
+        p.trail.push({x: nx, y: ny});
 
-        // Draw on visible canvas
         ctx.strokeStyle = p.color;
         ctx.lineWidth = LR * 2;
         ctx.lineCap = 'round';
