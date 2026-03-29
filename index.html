@@ -7,42 +7,42 @@
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap');
-:root{--bg:#070d13;--a:#00ffe7;--r:#ff0055;--p:rgba(8,18,30,.95);--b:rgba(0,255,231,.18);}
+:root{--bg:#070d13;--a:#ff6ec7;--r:#ff0055;--p:rgba(8,18,30,.95);--b:rgba(255,110,199,.18);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:#e0f0ff;font-family:'Share Tech Mono',monospace;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,231,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,231,.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,110,199,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,110,199,.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
 #app{position:relative;z-index:1;width:100%;height:100vh;display:flex;align-items:center;justify-content:center;}
 .screen{display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;width:100%;height:100%;padding:20px;}
 .screen.on{display:flex;}
-.TT{font-family:'Orbitron',sans-serif;font-size:clamp(24px,5vw,52px);font-weight:900;letter-spacing:.1em;color:var(--a);text-shadow:0 0 28px rgba(0,255,231,.8);text-align:center;animation:fl 5s infinite;}
+.TT{font-family:'Orbitron',sans-serif;font-size:clamp(24px,5vw,52px);font-weight:900;letter-spacing:.1em;color:var(--a);text-shadow:0 0 28px rgba(255,110,199,.8);text-align:center;animation:fl 5s infinite;}
 @keyframes fl{0%,93%,96%,100%{opacity:1}94%,95%{opacity:.5}}
-.panel{background:var(--p);border:1px solid var(--b);border-radius:3px;padding:22px 26px;box-shadow:0 0 18px rgba(0,255,231,.07);position:relative;overflow:hidden;}
+.panel{background:var(--p);border:1px solid var(--b);border-radius:3px;padding:22px 26px;box-shadow:0 0 18px rgba(255,110,199,.07);position:relative;overflow:hidden;}
 .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--a),transparent);opacity:.4;}
 .btn{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:.13em;padding:10px 15px;border:1px solid var(--a);background:transparent;color:var(--a);cursor:pointer;transition:all .15s;text-transform:uppercase;border-radius:2px;}
-.btn:hover{background:rgba(0,255,231,.08);box-shadow:0 0 12px rgba(0,255,231,.3);}
-.btn.ok{background:var(--a);color:#070d13;font-weight:900;box-shadow:0 0 14px rgba(0,255,231,.35);}
-.btn.ok:hover{box-shadow:0 0 24px rgba(0,255,231,.6);}
+.btn:hover{background:rgba(255,110,199,.08);box-shadow:0 0 12px rgba(255,110,199,.3);}
+.btn.ok{background:var(--a);color:#070d13;font-weight:900;box-shadow:0 0 14px rgba(255,110,199,.35);}
+.btn.ok:hover{box-shadow:0 0 24px rgba(255,110,199,.6);}
 .btn.bad{border-color:var(--r);color:var(--r);}
 .btn.bad:hover{background:rgba(255,0,85,.07);}
 .btn:disabled{opacity:.3;cursor:not-allowed;}
-.lbl{display:block;font-size:9px;letter-spacing:.22em;color:rgba(0,255,231,.5);margin-bottom:5px;text-transform:uppercase;}
-input{width:100%;background:rgba(0,255,231,.04);border:1px solid rgba(0,255,231,.18);color:#e0f0ff;font-family:'Share Tech Mono',monospace;font-size:14px;padding:8px 10px;outline:none;border-radius:2px;transition:border-color .2s;}
+.lbl{display:block;font-size:9px;letter-spacing:.22em;color:rgba(255,110,199,.5);margin-bottom:5px;text-transform:uppercase;}
+input{width:100%;background:rgba(255,110,199,.04);border:1px solid rgba(255,110,199,.18);color:#e0f0ff;font-family:'Share Tech Mono',monospace;font-size:14px;padding:8px 10px;outline:none;border-radius:2px;transition:border-color .2s;}
 input:focus{border-color:var(--a);}
 input::placeholder{color:rgba(255,255,255,.15);}
 .tc{display:none;}.tc.on{display:block;}
 .prow{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:2px;margin-bottom:5px;}
-.prow.me{border-color:rgba(0,255,231,.22);background:rgba(0,255,231,.035);}
+.prow.me{border-color:rgba(255,110,199,.22);background:rgba(255,110,199,.035);}
 .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .kp{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);padding:1px 4px;border-radius:2px;font-size:9px;}
 .rb{flex:1;padding:7px 3px;font-size:12px;}
 .rb.on{background:var(--a);color:#070d13;font-weight:900;}
-.codebox{text-align:center;font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;letter-spacing:.38em;color:var(--a);padding:12px;border:1px solid rgba(0,255,231,.2);background:rgba(0,255,231,.04);cursor:pointer;border-radius:2px;}
-.codebox:hover{border-color:var(--a);box-shadow:0 0 12px rgba(0,255,231,.22);}
+.codebox{text-align:center;font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;letter-spacing:.38em;color:var(--a);padding:12px;border:1px solid rgba(255,110,199,.2);background:rgba(255,110,199,.04);cursor:pointer;border-radius:2px;}
+.codebox:hover{border-color:var(--a);box-shadow:0 0 12px rgba(255,110,199,.22);}
 .badge{font-size:9px;letter-spacing:.12em;color:var(--a);opacity:.5;flex-shrink:0;}
 hr.d{border:none;border-top:1px solid rgba(255,255,255,.07);margin:10px 0;}
 #game-screen{flex-direction:row;gap:0;padding:0;align-items:stretch;}
 #sb{width:170px;min-width:110px;background:rgba(5,10,16,.99);border-right:1px solid var(--b);display:flex;flex-direction:column;padding:14px 11px;gap:10px;flex-shrink:0;}
-.sttl{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:.25em;color:rgba(0,255,231,.33);text-transform:uppercase;border-bottom:1px solid rgba(0,255,231,.1);padding-bottom:4px;}
+.sttl{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:.25em;color:rgba(255,110,199,.33);text-transform:uppercase;border-bottom:1px solid rgba(255,110,199,.1);padding-bottom:4px;}
 .si{display:flex;align-items:center;gap:6px;}
 .sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .snm{flex:1;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -52,17 +52,17 @@ hr.d{border:none;border-top:1px solid rgba(255,255,255,.07);margin:10px 0;}
 #rn{font-size:18px;font-weight:900;color:rgba(255,255,255,.35);display:block;text-align:center;}
 #gm{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#020608;}
 #cv{display:block;image-rendering:pixelated;}
-#gi{display:none;image-rendering:pixelated;width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;z-index:1;}
+#gi{display:none;image-rendering:crisp-edges;image-rendering:pixelated;width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;z-index:1;}
 #ov{z-index:10;}
 #ov{position:absolute;inset:0;background:rgba(5,10,16,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;backdrop-filter:blur(4px);z-index:10;}
 #ov.h{display:none;}
 #ot{font-family:'Orbitron',sans-serif;font-size:clamp(18px,4vw,36px);font-weight:900;text-align:center;color:var(--a);}
 #os{font-size:11px;color:rgba(255,255,255,.28);letter-spacing:.12em;text-align:center;}
-.cdr{width:70px;height:70px;border-radius:50%;border:2px solid rgba(0,255,231,.15);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:30px;font-weight:900;color:var(--a);animation:pu 1s ease-in-out infinite;}
-@keyframes pu{0%,100%{box-shadow:0 0 20px rgba(0,255,231,.3)}50%{box-shadow:0 0 38px rgba(0,255,231,.6)}}
+.cdr{width:70px;height:70px;border-radius:50%;border:2px solid rgba(255,110,199,.15);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:30px;font-weight:900;color:var(--a);animation:pu 1s ease-in-out infinite;}
+@keyframes pu{0%,100%{box-shadow:0 0 20px rgba(255,110,199,.3)}50%{box-shadow:0 0 38px rgba(255,110,199,.6)}}
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(70px);background:rgba(5,10,16,.97);border:1px solid var(--a);color:var(--a);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:.11em;padding:7px 14px;border-radius:2px;transition:transform .28s;z-index:200;white-space:nowrap;}
 #toast.show{transform:translateX(-50%) translateY(0);}
-#stbar{position:fixed;top:9px;right:11px;font-size:9px;letter-spacing:.11em;color:rgba(0,255,231,.33);display:flex;align-items:center;gap:5px;z-index:100;}
+#stbar{position:fixed;top:9px;right:11px;font-size:9px;letter-spacing:.11em;color:rgba(255,110,199,.33);display:flex;align-items:center;gap:5px;z-index:100;}
 .st{width:5px;height:5px;border-radius:50%;background:var(--a);animation:bk 1.5s infinite;}
 .st.off{background:var(--r);animation:none;}.st.cn{background:#ffcc00;}
 @keyframes bk{0%,100%{opacity:1}50%{opacity:.1}}
@@ -76,7 +76,7 @@ hr.d{border:none;border-top:1px solid rgba(255,255,255,.07);margin:10px 0;}
 
 <!-- HOME -->
 <div class="screen on" id="home-screen">
-  <div><div class="TT">ACHTUNG<br>DIE KURVE</div><div style="font-size:11px;color:rgba(0,255,231,.38);letter-spacing:.3em;text-transform:uppercase;text-align:center;margin-top:4px">Online Multiplayer · 2–6 Spieler</div></div>
+  <div><div class="TT">ACHTUNG<br>DIE KURVE</div><div style="font-size:11px;color:rgba(255,110,199,.38);letter-spacing:.3em;text-transform:uppercase;text-align:center;margin-top:4px">Online Multiplayer · 2–6 Spieler</div></div>
   <div class="panel" style="width:min(500px,96vw)">
     <div style="font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:.24em;color:var(--a);margin-bottom:12px;text-align:center">ONLINE MULTIPLAYER</div>
       <div style="margin-bottom:10px"><label class="lbl">Dein Name</label><input id="oname" placeholder="Name..." maxlength="14"></div>
@@ -92,7 +92,7 @@ hr.d{border:none;border-top:1px solid rgba(255,255,255,.07);margin:10px 0;}
           <button class="btn ok" onclick="oJoin()">OK</button>
         </div>
       </div>
-      <div id="pst" style="font-size:9px;color:rgba(0,255,231,.36);letter-spacing:.09em;text-align:center;margin-top:4px">Verbinde…</div>
+      <div id="pst" style="font-size:9px;color:rgba(255,110,199,.36);letter-spacing:.09em;text-align:center;margin-top:4px">Verbinde…</div>
   </div>
 </div>
 
@@ -101,15 +101,15 @@ hr.d{border:none;border-top:1px solid rgba(255,255,255,.07);margin:10px 0;}
   <div class="TT" style="font-size:clamp(16px,3vw,30px)">WARTERAUM</div>
   <div class="panel" style="width:min(460px,96vw)">
     <div id="codewrap">
-      <div style="font-size:9px;letter-spacing:.16em;color:rgba(0,255,231,.38);text-align:center;margin-bottom:6px">CODE — per WhatsApp teilen</div>
+      <div style="font-size:9px;letter-spacing:.16em;color:rgba(255,110,199,.38);text-align:center;margin-bottom:6px">CODE — per WhatsApp teilen</div>
       <div class="codebox" id="codebox" onclick="cpCode()">------</div>
-      <div style="font-size:9px;color:rgba(0,255,231,.22);text-align:center;margin-top:3px">Klicken zum Kopieren</div>
+      <div style="font-size:9px;color:rgba(255,110,199,.22);text-align:center;margin-top:3px">Klicken zum Kopieren</div>
       <hr class="d" style="margin:12px 0">
     </div>
     <div style="font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:.22em;color:var(--a);margin-bottom:11px;text-align:center">SPIELER (<span id="pcnt">0</span>/6)</div>
     <div id="wlist" style="margin-bottom:12px;min-height:38px"></div>
     <div id="rndwrap" style="margin-bottom:12px"><label class="lbl">RUNDEN</label><div style="display:flex;gap:5px" id="rb-w"></div></div>
-    <div id="spdwrap" style="margin-bottom:12px"><label class="lbl">GESCHWINDIGKEIT</label><div style="display:flex;gap:5px" id="spd-w"></div></div>
+    <div id="spdwrap" style="margin-bottom:12px"><label class="lbl">GESCHWINDIGKEIT</label><div id="spd-w"></div></div>
     <div id="hctrl"><button class="btn ok" style="width:100%;padding:11px" onclick="hStart()">▶ SPIEL STARTEN</button></div>
     <div id="gwait" style="display:none;text-align:center;font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.14em;padding:9px">Warte auf Host…</div>
   </div>
@@ -141,7 +141,7 @@ hr.d{border:none;border-top:1px solid rgba(255,255,255,.07);margin:10px 0;}
 // ═══════════════════════════════════════════════════════
 //  CONSTANTS
 // ═══════════════════════════════════════════════════════
-const COLORS=['#00ffe7','#ff0055','#ffcc00','#00ff66','#ff6600','#cc44ff'];
+const COLORS=['#ff6ec7','#ff0055','#ffcc00','#00ff66','#ff6600','#cc44ff'];
 const CNAMES=['Cyan','Rot','Gelb','Grün','Orange','Lila'];
 const CTRL=[
   {l:'ArrowLeft',r:'ArrowRight',lb:'← →'},
@@ -154,9 +154,11 @@ const CTRL=[
 const PN=['Spieler 1','Spieler 2','Spieler 3','Spieler 4','Spieler 5','Spieler 6'];
 
 // Physics — fixed 600×600 logical canvas ALWAYS
-const GS=600, TRN=0.040, LR=3, WL=10;
-let SPD=2.0; // adjustable speed
-const GP=0.008, GMN=14, GMX=34, GRC=120, HD=LR+1.0;
+const GS=800, TRN=0.040, LR=3, WL=10;
+let SPD=2.0; // adjustable speed (1-10 scale)
+// Offscreen collision canvas — pure black bg, colored trails = walls
+let collCtx=null;
+const GP=0.008, GMN=14, GMX=34;
 
 // ═══════════════════════════════════════════════════════
 //  STATE
@@ -177,11 +179,25 @@ const dn=k=>DW.has(k)||DW.has(k.toUpperCase())||DW.has(k.toLowerCase());
 // ═══════════════════════════════════════════════════════
 //  MATH
 // ═══════════════════════════════════════════════════════
-function dSqPS(px,py,ax,ay,bx,by){
-  const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;
-  if(!l)return(px-ax)**2+(py-ay)**2;
-  const t=Math.max(0,Math.min(1,((px-ax)*dx+(py-ay)*dy)/l));
-  return(px-(ax+t*dx))**2+(py-(ay+t*dy))**2;
+// Pixel-perfect collision via offscreen canvas
+function collCheck(x,y){
+  if(!collCtx)return false;
+  const px=Math.round(x), py=Math.round(y);
+  // Sample a 3x3 area around head
+  const d=collCtx.getImageData(Math.max(0,px-1),Math.max(0,py-1),3,3).data;
+  for(let i=3;i<d.length;i+=4) if(d[i]>128) return true;
+  return false;
+}
+function collPaint(x,y,px,py,color,isGap){
+  if(!collCtx||isGap)return;
+  // Draw thick line segment on collision canvas
+  collCtx.strokeStyle=color;
+  collCtx.lineWidth=LR*2+1;
+  collCtx.lineCap='round';
+  collCtx.beginPath();
+  collCtx.moveTo(px,py);
+  collCtx.lineTo(x,y);
+  collCtx.stroke();
 }
 function mkRng(seed){
   let s=seed>>>0;
@@ -203,13 +219,23 @@ function setPst(m){$('pst').textContent=m;}
 function togJoin(){const e=$('jw');e.style.display=e.style.display==='none'?'block':'none';if(e.style.display==='block')$('jcode').focus();}
 
 function mkSpdBtns(cid){
-  const opts=[{v:1.2,l:'Sehr Langsam'},{v:1.7,l:'Langsam'},{v:2.2,l:'Mittel'},{v:2.8,l:'Schnell'},{v:3.5,l:'Sehr Schnell'}];
-  $(cid).innerHTML=opts.map(o=>
-    `<button class="btn rb${o.v===SPD?' on':''}" data-spd="${o.v}" onclick="setSPD(${o.v})" style="font-size:9px;padding:6px 3px;flex:1">${o.l}</button>`).join('');
+  // Speed 1-10, stored as actual px/frame internally
+  const level=Math.round((SPD-0.8)/0.28)+1; // reverse map
+  $(cid).innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;width:100%">
+      <span style="font-size:10px;color:rgba(255,255,255,.4);min-width:10px">1</span>
+      <input type="range" id="spd-range" min="1" max="10" value="${level}"
+        style="flex:1;accent-color:#ff6ec7;cursor:pointer"
+        oninput="setSPD(this.value)">
+      <span style="font-size:10px;color:rgba(255,255,255,.4);min-width:10px">10</span>
+      <span id="spd-val" style="font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:#ff6ec7;min-width:20px;text-align:center">${level}</span>
+    </div>`;
 }
-function setSPD(v){
-  SPD=v;
-  document.querySelectorAll('#spd-w button').forEach(b=>b.classList.toggle('on',parseFloat(b.dataset.spd)===v));
+function setSPD(level){
+  level=parseInt(level);
+  SPD=0.8+((level-1)*0.28); // maps 1→0.8, 10→3.3
+  const rv=$('spd-range');if(rv)rv.value=level;
+  const sv=$('spd-val');if(sv)sv.textContent=level;
   if(isHost)bcast({t:'cfg',maxR,SPD});
 }
 
@@ -345,12 +371,44 @@ function handleMsg(d,from){
       }
       break;
     case 'goback':
-      // Host sent everyone back to menu
+      // Host kicked this guest or left
       if(mode==='guest'){
         if(raf){cancelAnimationFrame(raf);raf=null;}
-        gameState=null;mode='local';isHost=false;
+        gameState=null; collCtx=null; mode='local'; isHost=false;
+        conns=[]; rp=[];
         $('cv').style.display='block';$('gi').style.display='none';
-        ss('home-screen');setSt('on','BEREIT');
+        ss('home-screen'); setSt('on','BEREIT');
+        toast('Du wurdest vom Host entfernt.');
+      }
+      break;
+
+    case 'lobby':
+      // Host sends all guests back to waiting room
+      if(mode==='guest'){
+        if(raf){cancelAnimationFrame(raf);raf=null;}
+        gameState=null; collCtx=null; roundOver=false;
+        $('cv').style.display='none';
+        // re-open waiting room as guest
+        sc={}; rnd=1;
+        $('codebox').textContent=conns[0]?.peer?.replace('ADK-','')||'';
+        $('rndwrap').style.display='none';
+        $('spdwrap').style.display='none';
+        $('hctrl').style.display='none';
+        $('gwait').style.display='block';
+        renderW(); ss('wait-screen');
+      }
+      break;
+
+    case 'kicked':
+      // This guest was kicked
+      if(mode==='guest'){
+        if(raf){cancelAnimationFrame(raf);raf=null;}
+        gameState=null; collCtx=null; mode='local'; isHost=false;
+        conns.forEach(c=>{try{c.close();}catch(e){}});
+        conns=[]; rp=[];
+        $('cv').style.display='block';$('gi').style.display='none';
+        ss('home-screen'); setSt('on','BEREIT');
+        toast('Du wurdest vom Host gekickt.');
       }
       break;
     case 'err':
@@ -358,6 +416,23 @@ function handleMsg(d,from){
   }
 }
 function bcastRoom(){bcast({t:'room',players:rp,maxR});}
+
+function kickPlayer(kickPid){
+  // Send kicked message to that specific connection
+  const conn=conns.find(c=>c.peer===kickPid||c.peer==='ADK-'+kickPid||kickPid.includes(c.peer.replace('ADK-','')));
+  // Find by pid in rp
+  const kicked=rp.find(p=>p.pid===kickPid);
+  if(!kicked){toast('Spieler nicht gefunden');return;}
+  // Find their connection
+  const kconn=conns.find(c=>c.peer===kicked.pid);
+  if(kconn) try{kconn.send({t:'kicked'});}catch(e){}
+  // Remove from room
+  rp=rp.filter(p=>p.pid!==kickPid);
+  // Reassign colors by slot
+  rp.forEach((p,i)=>p.color=COLORS[i]);
+  bcastRoom(); renderW();
+  toast((kicked.name||'Spieler')+' wurde gekickt');
+}
 
 // ═══════════════════════════════════════════════════════
 //  WAITING ROOM
@@ -370,13 +445,15 @@ function renderW(){
     const ctrl=CTRL[p.ctrlIdx!=null?p.ctrlIdx:i]||CTRL[0];
     const d=document.createElement('div');
     d.className='prow'+(p.isMe?' me':'');
+    const canKick = isHost && !p.isMe && mode==='host';
     d.innerHTML=`
       <div class="dot" style="background:${p.color};box-shadow:0 0 5px ${p.color}80"></div>
       <div style="flex:1;font-size:13px">${p.name}</div>
       <span style="font-size:9px;color:${p.color};opacity:.75">${CNAMES[COLORS.indexOf(p.color)]||''}</span>
       ${p.isMe||mode==='local'?`<span class="kp">${fk(ctrl.l)}</span><span class="kp" style="margin-left:3px">${fk(ctrl.r)}</span>`:''}
       ${mode!=='local'&&i===0?'<span class="badge">HOST</span>':''}
-      ${p.isMe&&mode!=='local'?'<span class="badge" style="color:rgba(255,204,0,.7)">DU</span>':''}`;
+      ${p.isMe&&mode!=='local'?'<span class="badge" style="color:rgba(255,204,0,.7)">DU</span>':''}
+      ${canKick?`<button class="btn bad" style="padding:2px 7px;font-size:8px;margin-left:4px" onclick="kickPlayer('${p.pid}')">✕</button>`:''}`;
     el.appendChild(d);
   });
 }
@@ -513,18 +590,18 @@ window.addEventListener('resize',()=>{
 
 function drawField(ctx){
   ctx.fillStyle='#050c0f';ctx.fillRect(0,0,GS,GS);
-  ctx.strokeStyle='rgba(0,255,231,.022)';ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(255,110,199,.022)';ctx.lineWidth=1;
   for(let x=40;x<GS;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,GS);ctx.stroke();}
   for(let y=40;y<GS;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(GS,y);ctx.stroke();}
   drawWall(ctx);
 }
 function drawWall(ctx){
-  ctx.fillStyle='rgba(0,255,231,.055)';
+  ctx.fillStyle='rgba(255,110,199,.055)';
   ctx.fillRect(0,0,GS,WL);ctx.fillRect(0,GS-WL,GS,WL);ctx.fillRect(0,0,WL,GS);ctx.fillRect(GS-WL,0,WL,GS);
-  ctx.strokeStyle='rgba(0,255,231,.88)';ctx.lineWidth=1.5;
+  ctx.strokeStyle='rgba(255,110,199,.88)';ctx.lineWidth=1.5;
   ctx.strokeRect(WL-.75,WL-.75,GS-2*WL+1.5,GS-2*WL+1.5);
-  ctx.strokeStyle='rgba(0,255,231,.2)';ctx.lineWidth=1;ctx.strokeRect(.5,.5,GS-1,GS-1);
-  const ca=16;ctx.strokeStyle='rgba(0,255,231,.5)';ctx.lineWidth=2;
+  ctx.strokeStyle='rgba(255,110,199,.15)';ctx.lineWidth=1;ctx.strokeRect(.5,.5,GS-1,GS-1);
+  const ca=16;ctx.strokeStyle='rgba(255,110,199,.5)';ctx.lineWidth=2;
   [[0,0,1,1],[GS,0,-1,1],[0,GS,1,-1],[GS,GS,-1,-1]].forEach(([cx,cy,sx,sy])=>{
     ctx.beginPath();ctx.moveTo(cx+sx*WL,cy+sy*2);ctx.lineTo(cx+sx*WL,cy+sy*(WL+ca));ctx.stroke();
     ctx.beginPath();ctx.moveTo(cx+sx*2,cy+sy*WL);ctx.lineTo(cx+sx*(WL+ca),cy+sy*WL);ctx.stroke();
@@ -540,22 +617,40 @@ function initRound(){
   const ctx=setupCanvas();
   drawField(ctx);
 
+  // Offscreen collision canvas (same size, black bg = free, colored = wall)
+  const collCanvas=document.createElement('canvas');
+  collCanvas.width=GS; collCanvas.height=GS;
+  collCtx=collCanvas.getContext('2d');
+  collCtx.fillStyle='#000';
+  collCtx.fillRect(0,0,GS,GS);
+  // Paint wall into collision canvas
+  collCtx.fillStyle='#fff';
+  collCtx.fillRect(0,0,GS,WL); collCtx.fillRect(0,GS-WL,GS,WL);
+  collCtx.fillRect(0,0,WL,GS); collCtx.fillRect(GS-WL,0,WL,GS);
+
   const rng=mkRng(rnd*9999+42);
   const margin=WL+60;
   const src=rp;
 
   const players=src.map((p,i)=>{
     const ctrl=CTRL[p.ctrlIdx!=null?p.ctrlIdx:i]||CTRL[0];
+    const _sx=margin+rng()*(GS-2*margin);
+    const _sy=margin+rng()*(GS-2*margin);
     return {
       name:p.name,color:p.color,
       lk:ctrl.l,rk:ctrl.r,
       pid:p.pid||('L'+i),
       isLocal:!!p.isMe,
-      x:margin+rng()*(GS-2*margin),
-      y:margin+rng()*(GS-2*margin),
-      angle:rng()*Math.PI*2,
+      x:_sx,
+      y:_sy,
+      angle:(()=>{
+        // Point toward center ±50°
+        const dx=GS/2-_sx, dy=GS/2-_sy;
+        const base=Math.atan2(dy,dx);
+        return base+(rng()-0.5)*(Math.PI*5/9);
+      })(),
       alive:true,gap:false,gapT:0,
-      trail:[], // [{x,y,px,py,tc}]
+      px:0,py:0, // previous position for collision painting
       rL:false,rR:false, // remote keys
       _px:0,_py:0,
     };
@@ -611,40 +706,36 @@ function runLoop(ctx,players){
     // ── MOVE + COLLIDE + PAINT ──
     players.forEach(p=>{
       if(!p.alive)return;
-      p._px=p.x;p._py=p.y;
       const nx=p.x+Math.cos(p.angle)*SPD;
       const ny=p.y+Math.sin(p.angle)*SPD;
 
-      // Wall
+      // Wall collision (bounds check)
       if(nx<=WL||nx>=GS-WL||ny<=WL||ny>=GS-WL){doKill(ctx,p);return;}
 
-      // Trail collision (swept segment vs segment)
-      if(!p.gap){
-        const hSq=HD*HD;
-        outer:for(let pi=0;pi<players.length;pi++){
-          const o=players[pi];
-          const self=o===p;
-          const trail=o.trail;
-          for(let ti=0;ti<trail.length;ti++){
-            const dot=trail[ti];
-            // Skip own recent dots (grace period)
-            if(self&&(tc-dot.tc)<GRC)continue;
-            // Fast bounding box reject
-            if(nx<Math.min(dot.px,dot.x)-HD||nx>Math.max(dot.px,dot.x)+HD)continue;
-            if(ny<Math.min(dot.py,dot.y)-HD||ny>Math.max(dot.py,dot.y)+HD)continue;
-            // Exact point-to-segment distance
-            if(dSqPS(nx,ny,dot.px,dot.py,dot.x,dot.y)<hSq){doKill(ctx,p);break outer;}
-          }
-          if(!p.alive)break;
-        }
+      // Pixel-perfect trail collision — check BEFORE painting
+      // Grace: skip collision check for first 80 ticks (own fresh trail)
+      if(!p.gap&&tc>80){
+        if(collCheck(nx,ny)){doKill(ctx,p);return;}
+      } else if(!p.gap&&tc>0){
+        // During grace: still check against OTHER players' trails
+        // Temporarily hide own color, check, restore
+        // Simpler: check pixel — own trail not yet painted for first 80tc anyway
+        if(collCheck(nx,ny)){doKill(ctx,p);return;}
       }
       if(!p.alive)return;
 
-      // Paint trail
+      // Paint trail on both visible canvas and collision canvas
       if(!p.gap){
-        p.trail.push({x:nx,y:ny,px:p._px,py:p._py,tc});
-        ctx.beginPath();ctx.arc(nx,ny,LR,0,Math.PI*2);
-        ctx.fillStyle=p.color;ctx.fill();
+        // Visible canvas — smooth line
+        ctx.strokeStyle=p.color;
+        ctx.lineWidth=LR*2;
+        ctx.lineCap='round';
+        ctx.beginPath();
+        ctx.moveTo(p.x,p.y);
+        ctx.lineTo(nx,ny);
+        ctx.stroke();
+        // Collision canvas — paint after moving to avoid self-collision on fresh spawn
+        if(tc>60) collPaint(nx,ny,p.x,p.y,p.color,false);
       }
       p.x=nx;p.y=ny;
     });
@@ -752,40 +843,38 @@ function endRound(players,alive,ctx){
 // ═══════════════════════════════════════════════════════
 function showWinner(name,scores){
   if(scores)Object.assign(sc,scores);
-  const src=rp;
-  const p=src.find(p=>p.name===name);
+  const p=rp.find(p=>p.name===name);
   const c=p?p.color:'var(--a)';
   updSc();
   $('ot').innerHTML=`<div style="font-size:11px;letter-spacing:.28em;color:rgba(255,255,255,.26);margin-bottom:7px">🏆 GEWINNER</div><div style="color:${c};text-shadow:0 0 26px ${c}">${name}</div>`;
   $('cdn').style.display='none';
-
-  if(mode==='guest'){
-    // Guests see result but only host controls restart/menu
-    $('os').innerHTML=`<div style="margin-top:12px;font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.12em">Warte auf Host…</div>`;
-  } else {
-    // Host: buttons trigger for everyone
-    $('os').innerHTML=`<div style="display:flex;gap:10px;margin-top:13px">
-      <button class="btn ok" onclick="allRestart()">NOCHMAL</button>
-      <button class="btn" onclick="allMenu()">MENÜ</button>
-    </div>`;
-  }
+  $('os').innerHTML=`<div style="margin-top:12px;font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.12em">${mode==='guest'?'Kehre zur Lobby zurück…':'Kehre zur Lobby zurück…'}</div>`;
   $('ov').classList.remove('h');
+  // After 3 seconds → everyone back to lobby
+  setTimeout(backToLobby, 3000);
 }
 
-// Host triggers restart for ALL
-function allRestart(){
-  sc={};const src=mode==='local'?lp:rp;src.forEach(p=>sc[p.name]=0);rnd=1;
-  $('cdn').style.display='flex';
-  if(mode==='host') bcast({t:'frame',img:$('cv').toDataURL('image/jpeg',.4),sc:{...sc},rnd,maxR,ov:'hide'});
-  // Guests will receive next round via frame stream
-  initRound();
+function backToLobby(){
+  if(raf){cancelAnimationFrame(raf);raf=null;}
+  gameState=null; roundOver=false; collCtx=null;
+  sc={}; rnd=1; rp.forEach(p=>sc[p.name]=0);
+  if(mode==='host'){
+    bcast({t:'lobby'});
+    // Reopen waiting room as host
+    $('cv').style.display='block';
+    $('gi').style.display='none';
+    openW(true);
+  } else if(mode==='guest'){
+    $('cv').style.display='none';
+    $('codebox').textContent=(conns[0]?.peer||'').replace('ADK-','');
+    $('rndwrap').style.display='none';
+    $('spdwrap').style.display='none';
+    $('hctrl').style.display='none';
+    $('gwait').style.display='block';
+    renderW(); ss('wait-screen');
+  }
 }
 
-// Host sends everyone to menu
-function allMenu(){
-  bcast({t:'goback'});
-  leave();
-}
 
 function showOv(t,s){$('ov').classList.remove('h');$('ot').textContent=t;$('ot').style.color='var(--a)';$('os').textContent=s||'';$('cdn').style.display='flex';}
 function hideOv(){$('ov').classList.add('h');}
